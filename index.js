@@ -1,15 +1,17 @@
 class Bowling {
   constructor () {
     this.current = 0
+    this.LAST_FRAME = 9
+
     this.inFrame = false
+
     this.frames = []
-    this.finished = false
     this.bonusThrows = []
   }
 
   roll (pins) {
     if (this.isFinished()) throw new Error('Not possible to roll again: the game is over')
-    if (this.current > 9) {
+    if (this.current > this.LAST_FRAME) {
       this.bonusThrows.push(pins)
       return
     }
@@ -40,10 +42,11 @@ class Bowling {
   getScore () {
     let score = this.frames.reduce((acc, curr, index) => {
       acc += this.getFrameScore(index)
+
       if (curr.bonus === 'spare') acc += (this.frames[index + 1]?.first || 0)
       if (curr.bonus === 'strike') {
         acc += (this.frames[index + 1]?.first || 0) + (this.frames[index + 1]?.second || this.frames[index + 2]?.first || 0)
-        if (index === 8 && this.frames[index + 1]?.bonus === 'strike') acc += this.bonusThrows[0] || 0
+        if (index === this.LAST_FRAME - 1 && this.frames[this.LAST_FRAME]?.bonus === 'strike') acc += this.bonusThrows[0] || 0
       }
 
       return acc
@@ -58,11 +61,12 @@ class Bowling {
   }
 
   isFinished () {
-    const lastFrame = this.frames[9]
-    if (this.current > 9 && lastFrame?.bonus === 'spare') return this.bonusThrows.length
-    if (this.current > 9 && lastFrame?.bonus === 'strike') return this.bonusThrows.length >= 2
+    const lastFrame = this.frames[this.LAST_FRAME]
 
-    return (this.current > 9 && !lastFrame?.bonus)
+    if (this.current > this.LAST_FRAME && lastFrame?.bonus === 'spare') return this.bonusThrows.length
+    if (this.current > this.LAST_FRAME && lastFrame?.bonus === 'strike') return this.bonusThrows.length >= 2
+
+    return (this.current > this.LAST_FRAME && !lastFrame?.bonus)
   }
 }
 
