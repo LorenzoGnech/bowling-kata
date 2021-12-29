@@ -19,17 +19,22 @@ class Bowling {
       return
     }
 
+    const isStrike = pins === 10
     this.frames[this.current] = {
       first: pins,
-      second: null
+      second: null,
+      bonus: isStrike ? 'strike' : null
     }
-    this.inFrame = true
+    this.inFrame = !isStrike
+    if (isStrike) this.current++
   }
 
   getScore () {
+    console.log(this.frames)
     return this.frames.reduce((acc, curr, index) => {
       acc += this.getFrameScore(index)
       if (curr.bonus === 'spare') acc += (this.frames[index + 1]?.first || 0)
+      if (curr.bonus === 'strike') acc += (this.frames[index + 1]?.first || 0) + (this.frames[index + 1]?.second || this.frames[index + 2]?.first || 0)
 
       return acc
     }, 0)

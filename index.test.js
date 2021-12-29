@@ -88,3 +88,38 @@ test('Step 2 - should handle spare with no following roll', t => {
 
   t.is(score, 10)
 })
+
+test('Step 3 - should correctly award the bonus points for a strike', t => {
+  const game = new Bowling()
+  game.roll(10)
+  game.roll(1)
+  game.roll(8)
+
+  const score = game.getScore()
+
+  t.is(score, 28)
+})
+
+test('Step 3 - should correctly handle a strike with no following roll', t => {
+  const game = new Bowling()
+  game.roll(2)
+  game.roll(1)
+  game.roll(10)
+
+  const score = game.getScore()
+
+  t.is(score, 13)
+})
+
+test('Step 3 - should correctly handle multiple strikes', t => {
+  const game = new Bowling()
+  game.roll(10)
+  game.roll(10)
+  game.roll(10)
+  game.roll(4)
+  game.roll(2)
+
+  const score = game.getScore()
+
+  t.is(score, 76)
+})
