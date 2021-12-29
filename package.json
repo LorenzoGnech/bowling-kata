@@ -1,0 +1,22 @@
+{
+  "name": "bowling-kata",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "WAIT=1 ava --serial --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LorenzoGnech/bowling-kata.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LorenzoGnech/bowling-kata/issues"
+  },
+  "homepage": "https://github.com/LorenzoGnech/bowling-kata#readme",
+  "dependencies": {
+    "ava": "^3.15.0"
+  }
+}
