@@ -6,6 +6,8 @@ class Bowling {
   }
 
   roll (pins) {
+    if (this.current > 9 && (!this.frames[9].bonus || (this.frames[9].bonus === 'spare' && this.inFrame))) throw new Error('Not possible to roll again: the game is over')
+
     if (this.inFrame) {
       const currentFrame = this.frames[this.current]
       currentFrame.second = pins
@@ -30,11 +32,11 @@ class Bowling {
   }
 
   getScore () {
-    console.log(this.frames)
     return this.frames.reduce((acc, curr, index) => {
       acc += this.getFrameScore(index)
-      if (curr.bonus === 'spare') acc += (this.frames[index + 1]?.first || 0)
-      if (curr.bonus === 'strike') acc += (this.frames[index + 1]?.first || 0) + (this.frames[index + 1]?.second || this.frames[index + 2]?.first || 0)
+
+      if (curr.bonus === 'spare' && index < 9) acc += (this.frames[index + 1]?.first || 0)
+      if (curr.bonus === 'strike' && index < 9) acc += (this.frames[index + 1]?.first || 0) + (this.frames[index + 1]?.second || this.frames[index + 2]?.first || 0)
 
       return acc
     }, 0)
