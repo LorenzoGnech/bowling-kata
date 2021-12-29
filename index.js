@@ -7,9 +7,15 @@ class Bowling {
 
   roll (pins) {
     if (this.inFrame) {
-      if (this.frames[this.current].first + pins > 10) throw new Error('Not possible to knock down more than 10 pins in a frame')
-      this.frames[this.current++].second = pins
+      const currentFrame = this.frames[this.current]
+      currentFrame.second = pins
+
+      const currentScore = this.getFrameScore(this.current)
+      if (currentScore > 10) throw new Error('Not possible to knock down more than 10 pins in a frame')
+      currentFrame.bonus = currentFrame.second && (currentScore === 10) ? 'spare' : null
+
       this.inFrame = false
+      this.current++
       return
     }
 
@@ -21,10 +27,16 @@ class Bowling {
   }
 
   getScore () {
-    return this.frames.reduce((acc, curr) => {
-      acc += curr.first + curr.second
+    return this.frames.reduce((acc, curr, index) => {
+      acc += this.getFrameScore(index)
+      if (curr.bonus === 'spare') acc += (this.frames[index + 1]?.first || 0)
+
       return acc
     }, 0)
+  }
+
+  getFrameScore (index) {
+    return (this.frames[index]?.first || 0) + (this.frames[index]?.second || 0)
   }
 }
 
