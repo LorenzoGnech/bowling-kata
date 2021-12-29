@@ -1,6 +1,12 @@
 const test = require('ava')
 const { Bowling } = require('.')
 
+const multipleRolls = (game, rolls) => {
+  rolls.forEach(pins => {
+    game.roll(pins)
+  })
+}
+
 test('Step 1 - score should be 0 if no pins have been knocked down', t => {
   const game = new Bowling()
 
@@ -11,10 +17,7 @@ test('Step 1 - score should be 0 if no pins have been knocked down', t => {
 
 test('Step 1 - should correctly keep track of the score', t => {
   const game = new Bowling()
-  game.roll(6)
-  game.roll(3)
-  game.roll(5)
-  game.roll(2)
+  multipleRolls(game, [6, 3, 5, 2])
 
   const score = game.getScore()
 
@@ -23,9 +26,7 @@ test('Step 1 - should correctly keep track of the score', t => {
 
 test('Step 1 - should return the partial score even if a frame is not yet finished', t => {
   const game = new Bowling()
-  game.roll(5)
-  game.roll(4)
-  game.roll(6)
+  multipleRolls(game, [5, 4, 6])
 
   const score = game.getScore()
 
@@ -34,9 +35,8 @@ test('Step 1 - should return the partial score even if a frame is not yet finish
 
 test('Step 1 - should throw if given an invalid sequence of rolls', t => {
   const game = new Bowling()
-  game.roll(5)
-  game.roll(4)
-  game.roll(6)
+  multipleRolls(game, [5, 4, 6])
+
   const { message } = t.throws(() => game.roll(7))
 
   t.is(message, 'Not possible to knock down more than 10 pins in a frame')
@@ -44,10 +44,7 @@ test('Step 1 - should throw if given an invalid sequence of rolls', t => {
 
 test('Step 2 - should correctly add the bonus for a spare', t => {
   const game = new Bowling()
-  game.roll(5)
-  game.roll(5)
-  game.roll(6)
-  game.roll(2)
+  multipleRolls(game, [5, 5, 6, 2])
 
   const score = game.getScore()
 
@@ -56,9 +53,7 @@ test('Step 2 - should correctly add the bonus for a spare', t => {
 
 test('Step 2 - should add the spare bonus even for an uncompleted frame afterwards', t => {
   const game = new Bowling()
-  game.roll(5)
-  game.roll(5)
-  game.roll(1)
+  multipleRolls(game, [5, 5, 1])
 
   const score = game.getScore()
 
@@ -67,12 +62,7 @@ test('Step 2 - should add the spare bonus even for an uncompleted frame afterwar
 
 test('Step 2 - should handle multiple spare bonus in a row', t => {
   const game = new Bowling()
-  game.roll(5)
-  game.roll(5)
-  game.roll(4)
-  game.roll(6)
-  game.roll(2)
-  game.roll(3)
+  multipleRolls(game, [5, 5, 4, 6, 2, 3])
 
   const score = game.getScore()
 
@@ -81,8 +71,7 @@ test('Step 2 - should handle multiple spare bonus in a row', t => {
 
 test('Step 2 - should handle spare with no following roll', t => {
   const game = new Bowling()
-  game.roll(9)
-  game.roll(1)
+  multipleRolls(game, [9, 1])
 
   const score = game.getScore()
 
@@ -91,9 +80,7 @@ test('Step 2 - should handle spare with no following roll', t => {
 
 test('Step 3 - should correctly award the bonus points for a strike', t => {
   const game = new Bowling()
-  game.roll(10)
-  game.roll(1)
-  game.roll(8)
+  multipleRolls(game, [10, 1, 8])
 
   const score = game.getScore()
 
@@ -102,9 +89,7 @@ test('Step 3 - should correctly award the bonus points for a strike', t => {
 
 test('Step 3 - should correctly handle a strike with no following roll', t => {
   const game = new Bowling()
-  game.roll(2)
-  game.roll(1)
-  game.roll(10)
+  multipleRolls(game, [2, 1, 10])
 
   const score = game.getScore()
 
@@ -113,11 +98,7 @@ test('Step 3 - should correctly handle a strike with no following roll', t => {
 
 test('Step 3 - should correctly handle multiple strikes', t => {
   const game = new Bowling()
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(4)
-  game.roll(2)
+  multipleRolls(game, [10, 10, 10, 4, 2])
 
   const score = game.getScore()
 
@@ -126,17 +107,8 @@ test('Step 3 - should correctly handle multiple strikes', t => {
 
 test('Step 4 - should throw if the game is past the tenth frame', t => {
   const game = new Bowling()
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(8)
-  game.roll(1)
+  multipleRolls(game, [10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 1])
+
   const { message } = t.throws(() => game.roll(7))
 
   t.is(message, 'Not possible to roll again: the game is over')
@@ -144,18 +116,7 @@ test('Step 4 - should throw if the game is past the tenth frame', t => {
 
 test('Step 4 - should return the correct score for a complete match', t => {
   const game = new Bowling()
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(7)
-  game.roll(1)
-  game.roll(10)
-  game.roll(10)
-  game.roll(8)
-  game.roll(1)
+  multipleRolls(game, [10, 10, 10, 10, 10, 10, 7, 1, 10, 10, 8, 1])
 
   const score = game.getScore()
 
@@ -164,19 +125,7 @@ test('Step 4 - should return the correct score for a complete match', t => {
 
 test('Step 4 - should allow to complete the bonus if a spare is made on the last frame', t => {
   const game = new Bowling()
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(7)
-  game.roll(1)
-  game.roll(10)
-  game.roll(10)
-  game.roll(8)
-  game.roll(2)
-  game.roll(5)
+  multipleRolls(game, [10, 10, 10, 10, 10, 10, 7, 1, 10, 10, 8, 2, 5])
 
   const score = game.getScore()
 
@@ -185,19 +134,8 @@ test('Step 4 - should allow to complete the bonus if a spare is made on the last
 
 test('Step 4 - should not allow two bonus throws if a spare is made on the last frame', t => {
   const game = new Bowling()
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(7)
-  game.roll(1)
-  game.roll(10)
-  game.roll(10)
-  game.roll(8)
-  game.roll(2)
-  game.roll(5)
+  multipleRolls(game, [10, 10, 10, 10, 10, 10, 7, 1, 10, 10, 8, 2, 5])
+
   const { message } = t.throws(() => game.roll(1))
 
   t.is(message, 'Not possible to roll again: the game is over')
@@ -205,25 +143,7 @@ test('Step 4 - should not allow two bonus throws if a spare is made on the last 
 
 test('Step 4 - should allow to complete the bonus if a strike is made on the last frame', t => {
   const game = new Bowling()
-  game.roll(5)
-  game.roll(5)
-  game.roll(6)
-  game.roll(3)
-  game.roll(7)
-  game.roll(3)
-  game.roll(3)
-  game.roll(2)
-  game.roll(2)
-  game.roll(4)
-  game.roll(5)
-  game.roll(4)
-  game.roll(10)
-  game.roll(10)
-  game.roll(8)
-  game.roll(1)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
+  multipleRolls(game, [5, 5, 6, 3, 7, 3, 3, 2, 2, 4, 5, 4, 10, 10, 8, 1, 10, 10, 10])
 
   const score = game.getScore()
 
@@ -232,20 +152,18 @@ test('Step 4 - should allow to complete the bonus if a strike is made on the las
 
 test('Step 4 - should handle all strikes', t => {
   const game = new Bowling()
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
-  game.roll(10)
+  multipleRolls(game, [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10])
 
   const score = game.getScore()
 
   t.is(score, 300)
+})
+
+test('Step 4 - should throw if given more than the maximum amount of rolls possible', t => {
+  const game = new Bowling()
+  multipleRolls(game, [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10])
+
+  const { message } = t.throws(() => game.roll(10))
+
+  t.is(message, 'Not possible to roll again: the game is over')
 })
