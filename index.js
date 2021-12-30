@@ -3,15 +3,13 @@ class Bowling {
     this.current = 0
     this.LAST_FRAME = 9
 
-    this.inFrame = false
-
     this.frames = []
     this.bonusThrows = []
   }
 
   roll (pins) {
-    if (this.isFinished()) throw new Error('Not possible to roll again: the game is over')
-    if (this.current > this.LAST_FRAME) {
+    if (this.finished) throw new Error('Not possible to roll again: the game is over')
+    if (this.inBonusThrows) {
       this.bonusThrows.push(pins)
       return
     }
@@ -24,7 +22,6 @@ class Bowling {
       if (currentScore > 10) throw new Error('Not possible to knock down more than 10 pins in a frame')
       currentFrame.bonus = currentFrame.second && (currentScore === 10) ? 'spare' : null
 
-      this.inFrame = false
       this.current++
       return
     }
@@ -35,38 +32,59 @@ class Bowling {
       second: null,
       bonus: isStrike ? 'strike' : null
     }
-    this.inFrame = !isStrike
+
     if (isStrike) this.current++
   }
 
   getScore () {
-    let score = this.frames.reduce((acc, curr, index) => {
-      acc += this.getFrameScore(index)
+    const score = this.frames.reduce((partialScore, curr, frame) => {
+      partialScore += this.getFrameScore(frame)
 
-      if (curr.bonus === 'spare') acc += (this.frames[index + 1]?.first || 0)
-      if (curr.bonus === 'strike') {
-        acc += (this.frames[index + 1]?.first || 0) + (this.frames[index + 1]?.second || this.frames[index + 2]?.first || 0)
-        if (index === this.LAST_FRAME - 1 && this.frames[this.LAST_FRAME]?.bonus === 'strike') acc += this.bonusThrows[0] || 0
-      }
+      const spareBonus = this.isSpare(frame) ? (this.frames[frame + 1]?.first || 0) : 0
+      const strikeBonus = this.isStrike(frame) ? (this.frames[frame + 1]?.first || 0) + (this.frames[frame + 1]?.second || this.frames[frame + 2]?.first || 0) : 0
 
-      return acc
+      return partialScore + spareBonus + strikeBonus
     }, 0)
-    score += this.bonusThrows.reduce((a, b) => a + b, 0)
 
-    return score
+    return score + this.bonusPoints
+  }
+
+  get finished () {
+    const lastFrame = this.frames[this.LAST_FRAME]
+
+    const noBonus = !lastFrame?.bonus
+    const isSpareBonusCompleted = lastFrame?.bonus === 'spare' && this.bonusThrows.length === 1
+    const isStrikeBonusCompleted = lastFrame?.bonus === 'strike' && this.bonusThrows.length === 2
+
+    return this.inBonusThrows && (noBonus || isSpareBonusCompleted || isStrikeBonusCompleted)
+  }
+
+  get inBonusThrows () {
+    return this.current > this.LAST_FRAME
+  }
+
+  get inFrame () {
+    const currentFrame = this.frames[this.current]
+    return !this.isStrike(currentFrame) && (currentFrame?.first && !currentFrame?.second)
+  }
+
+  get bonusPoints () {
+    const bonusThrows = this.bonusThrows
+    const bonusOnFrameNine = this.isStrike(this.LAST_FRAME - 1) && this.isStrike(this.LAST_FRAME) ? bonusThrows[0] : 0
+
+    return bonusThrows.reduce((a, b) => a + b, 0) + bonusOnFrameNine
   }
 
   getFrameScore (index) {
     return (this.frames[index]?.first || 0) + (this.frames[index]?.second || 0)
   }
 
-  isFinished () {
-    const lastFrame = this.frames[this.LAST_FRAME]
+  isStrike (index) {
+    return this.frames[index]?.bonus === 'strike'
+  }
 
-    if (this.current > this.LAST_FRAME && lastFrame?.bonus === 'spare') return this.bonusThrows.length
-    if (this.current > this.LAST_FRAME && lastFrame?.bonus === 'strike') return this.bonusThrows.length >= 2
-
-    return (this.current > this.LAST_FRAME && !lastFrame?.bonus)
+  isSpare (index) {
+    return this.frames[index]?.bonus === 'spare'
   }
 }
 
